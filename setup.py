@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="gclient",
-    version="1.0",
+    name="gcode_utils",
+    version="1.1",
     author="Ghegghe",
     maintainer="Ghegghe",
-    description="Python client using requests",
+    description="Ghegghe's Python coding utils",
     packages=find_packages(),
     install_requires=[
-        "gcode_utils",
-        "Requests",
+        "requests>=2.31.0",
     ],
 )
