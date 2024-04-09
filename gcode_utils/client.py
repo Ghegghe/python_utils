@@ -1,9 +1,6 @@
-import base64
-import json
 from typing import Optional
 import time
 import ssl
-import uuid
 from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 from requests.cookies import RequestsCookieJar
@@ -196,50 +193,3 @@ class Client:
         params: Optional[dict] = None,
     ) -> Response:
         return await self.request("post", endpoint, headers, payload, params)
-
-
-class ClientFactory:
-    @staticmethod
-    def get_service_data(service: str) -> dict:
-        with open(f"client_settings\\{service}.json", "r") as f:
-            return json.load(f)
-
-    @staticmethod
-    def extract_auth_config(config: dict) -> tuple:
-        return {
-            "base_api": config["base_api"],
-            "endpoint": config["auth"]["endpoint"],
-            "headers": config["auth"]["headers"],
-            "payload": config["auth"]["payload"],
-        }
-
-    @staticmethod
-    def extract_client_config(config: dict) -> tuple:
-        return (config["base_api"], config["default_headers"])
-
-    @classmethod
-    def crunchyroll(cls, proxy: Optional[str] = None) -> Client:
-        config = cls.get_service_data("crunchyroll")
-
-        auth = cls.extract_auth_config(config)
-        auth["headers"]["Authorization"] = str(
-            auth["headers"]["Authorization"]
-        ).replace(
-            "{token}",
-            base64.b64encode(
-                f"{config['auth']['user']}:{config['auth']['password']}".encode()
-            ).decode(),
-        )
-        auth["headers"]["ETP-Anonymous-ID"] = str(
-            auth["headers"]["ETP-Anonymous-ID"]
-        ).replace(
-            "{id}",
-            uuid.uuid4().__str__(),
-        )
-
-        return Client(Auth(**auth), *cls.extract_client_config(config), proxy)
-
-    @classmethod
-    def prime_video(cls, proxy: Optional[str] = None) -> Client:
-        config = cls.get_service_data("prime_video")
-        return Client(None, *cls.extract_client_config(config), proxy)
