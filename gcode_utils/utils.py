@@ -34,7 +34,10 @@ def value_or_none(
 
 
 def run_detached_subprocess(
-    command: str, subprocess_path: str, args: Optional[list] = []
+    command: str,
+    subprocess_path: str,
+    close_on_stop: bool = False,
+    args: Optional[list] = [],
 ) -> int:
     """
     Runs detached subprocess
@@ -60,14 +63,36 @@ def run_detached_subprocess(
         return -2
     elif sistema_operativo == "Windows":
         subprocess.Popen(
-            ["start", "cmd", "/c", command, subprocess_path] + args, shell=True
+            ["start", "cmd", "/c" if close_on_stop else "/k", command, subprocess_path]
+            + args,
+            shell=True,
         )
         return 1
     elif sistema_operativo == "Darwin":  # macOS
-        subprocess.Popen(["open", "-a", "Terminal", command, subprocess_path] + args)
+        subprocess.Popen(
+            [
+                "open",
+                "-a",
+                "Terminal",
+                command + "; bash" if close_on_stop else "",
+                subprocess_path,
+            ]
+            + args
+        )
         return 2
     elif sistema_operativo == "Linux":
-        subprocess.Popen(["x-terminal-emulator", "-e", command, subprocess_path] + args)
+        if close_on_stop:
+            subprocess.Popen(
+                [
+                    "x-terminal-emulator",
+                    "-e",
+                    f"bash -c '{command} {subprocess_path} {' '.join(args)}; exec bash'",
+                ]
+            )
+        else:
+            subprocess.Popen(
+                ["x-terminal-emulator", "-e", command, subprocess_path] + args
+            )
         return 3
     else:
         return 0

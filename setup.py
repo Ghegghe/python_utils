@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="gcode_utils",
-    version="1.1",
+    version="1.1.1",
     author="Ghegghe",
     maintainer="Ghegghe",
     description="Ghegghe's Python coding utils",
